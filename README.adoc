@@ -1,0 +1,16 @@
+= Репликация - это просто (нет)
+
+Sources for tech talk @ Mail.Ru on network replication
+
+* link:https://slonopotamus.github.io/replication/presentation.html[Interactive HTML]
+* link:https://slonopotamus.github.io/replication/presentation.html?print-pdf[Printable]
+
+== Building
+
+[source,bash]
+----
+bundle install
+bundle exec rake
+----
+
+And then, open `build/presentation.html`

@@ -1,0 +1,13 @@
+= Репликация - это просто (нет)
+Марат Радченко <https://github.com/slonopotamus[@slonopotamus]>
+v1.0, 2021-03-02
+:source-highlighter: highlightjs
+:revealjs_hash: true
+:revealjs_theme: league
+:revealjsdir: https://cdn.jsdelivr.net/npm/reveal.js@3.9.2
+:icons: font
+:imagesdir: images
+
+**{revdate}**
+
+== The End
