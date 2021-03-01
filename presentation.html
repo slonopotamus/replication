@@ -393,19 +393,10 @@ link.rel = 'stylesheet';
 link.type = 'text/css';
 link.href = window.location.search.match( /print-pdf/gi ) ? "https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/css/print/pdf.css" : "https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/css/print/paper.css";
 document.getElementsByTagName( 'head' )[0].appendChild( link );</script></head><body><div class="reveal"><div class="slides"><section class="title" data-state="title"><h1>Репликация - это просто (нет)</h1><div class="preamble"><div class="paragraph"><p><strong>2021-03-02</strong></p></div></div><p class="author"><small>Марат Радченко</small></p></section>
-<section><div class="slide-content"><div class="paragraph"><p>Репликация - сетевая синхронизация состояния primary-объекта и его копий в раздельных экземплярах приложения</p></div>
-<div class="imageblock"><img src="images/diag-265ed9ad382019a291c2daf17c4e71b1.png" alt="Diagram"></div></div></section>
-<section id="_tcp"><h2>TCP</h2><div class="slide-content"><div class="ulist"><ul><li><p>Игры, где важна полная цепочка игровых событий</p></li><li><p>Не-риалтайм игры</p></li></ul></div>
-<hr>
-<div class="paragraph"><p>Да, я в курсе, что смешиваю stream-based и message-based</p></div></div></section>
-<section id="_udp"><h2>UDP</h2><div class="slide-content"><div class="ulist"><ul><li><p>Потеряли пакет "где стоял враг секунду назад"?
-Ну и чёрт с ним, враг уже совсем в другом месте стоит</p></li><li><p>Нужно заново реализовывать гарантированную доставку<sup class="footnote">[<span class="footnote" title="View footnote.">1</span>]</sup></p></li><li><p>Приложение само управляет шейпингом трафика</p></li></ul></div></div><div class="footnotes"><div class="footnote">1. Однако это someone else&#8217;s problem,{space}обычно в игровом движке уже реализовано</div></div></section>
-<section id="_гарантии_консистентности"><h2>Гарантии консистентности</h2><div class="slide-content"><div class="paragraph"><p>Eventually-consistent система - это такая система, которая почти никогда не консистентна</p></div></div></section>
-<section id="_гарантии_консистентности_2"><h2>Гарантии консистентности</h2><div class="slide-content"><div class="ulist"><ul><li><p>Поле репличного объекта</p></li><li><p>Комбинация всех значений полей одного репличного объекта</p></li><li><p>Полное состояние всех репличных объектов<sup class="footnote">[<span class="footnote" title="View footnote.">1</span>]</sup></p></li></ul></div></div><div class="footnotes"><div class="footnote">1. На практике не встречается примерно никогда</div></div></section>
-<section id="_shadow_copy"><h2>Shadow-copy</h2><div class="slide-content"><div class="imageblock"><img src="images/diag-9d786de52673ae14de4e4426f9f3ff0a.png" alt="Diagram"></div>
+<section><section><div class="slide-content"><div class="paragraph"><p>Репликация - сетевая синхронизация состояния primary-объекта и его копий в раздельных экземплярах приложения</p></div><div class="imageblock"><img src="images/diag-265ed9ad382019a291c2daf17c4e71b1.png" alt="Diagram"></div></div></section><section id="_tcp"><h2>TCP</h2><div class="slide-content"><div class="ulist"><ul><li><p>Оптимизирован под буферизацию и потоковую передачу</p></li><li><p>Важна полная цепочка игровых событий</p></li><li><p>Для не-риалтайм игр</p></li></ul></div></div></section><section id="_udp"><h2>UDP</h2><div class="slide-content"><div class="ulist"><ul><li><p>Потеряли пакет "где стоял враг секунду назад"?
+Ну и чёрт с ним, враг уже совсем в другом месте стоит и пора уже другую информацию отправлять</p></li><li><p>Нужно заново реализовывать TCP-like гарантированную доставку<sup class="footnote">[<span class="footnote" title="View footnote.">1</span>]</sup></p></li><li><p>Приложение само управляет шейпингом трафика</p></li></ul></div></div><div class="footnotes"><div class="footnote">1. Однако это someone else&#8217;s problem,{space}обычно в игровом движке уже реализовано</div></div></section><section id="_гарантии_консистентности"><h2>Гарантии консистентности</h2><div class="slide-content"><div class="paragraph"><p>Eventually-consistent система - это такая система, которая почти никогда не консистентна</p></div></div></section><section id="_гарантии_консистентности_2"><h2>Гарантии консистентности</h2><div class="slide-content"><div class="ulist"><ul><li><p>Одно поле репличного объекта</p></li><li><p>Комбинация всех полей одного репличного объекта</p></li><li><p>Полное состояние всех репличных объектов<sup class="footnote">[<span class="footnote" title="View footnote.">1</span>]</sup></p></li></ul></div></div><div class="footnotes"><div class="footnote">1. На практике не встречается примерно никогда</div></div></section><section id="_shadow_copy"><h2>Shadow-copy</h2><div class="slide-content"><div class="imageblock"><img src="images/diag-e01d4907d63c460a79ca5f73a4a8071e.png" alt="Diagram"></div>
 <div class="paragraph"><p>Shadow copy:</p></div>
-<div class="ulist"><ul><li><p>Компактна</p></li><li><p>Безопасна к использованию в отдельном потоке</p></li></ul></div></div></section>
-<section id="_memory_scanning"><h2>Memory scanning</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">void TickReplica() {
+<div class="ulist"><ul><li><p>Компактна в памяти</p></li><li><p>Безопасна к использованию в отдельном потоке</p></li></ul></div></div></section><section id="_memory_scanning"><h2>Memory scanning</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">void TickReplica() {
     shadow = actor.Gather();
     foreach (field in actor.replicatedFields) {
         if (shadow[field] != prevShadow[field]) {
@@ -414,8 +405,7 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script></head><
     }
 }</code></pre></div></div>
 <div class="openblock text-left"><div class="content"><div class="paragraph"><p><span class="icon"><i class="fa fa-plus"></i></span> С т.з. программиста Just Works</p></div>
-<div class="paragraph"><p><span class="icon"><i class="fa fa-minus"></i></span> Постоянно жрёт проц пропорционально количеству существующих в мире акторов</p></div></div></div></div></section>
-<section id="_push_based"><h2>Push-based</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">class Actor {
+<div class="paragraph"><p><span class="icon"><i class="fa fa-minus"></i></span> Постоянно жрёт проц пропорционально количеству существующих в мире акторов</p></div></div></div></div></section><section id="_push_based"><h2>Push-based</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">class Actor {
     void SetField(T newValue) {
         T oldValue = this.val;
 
@@ -427,27 +417,47 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script></head><
     }
 }</code></pre></div></div>
 <div class="openblock text-left"><div class="content"><div class="paragraph"><p><span class="icon"><i class="fa fa-plus"></i></span> Тратится время только при изменении полей</p></div>
-<div class="paragraph"><p><span class="icon"><i class="fa fa-minus"></i></span> Надо не забывать сообщать системе репликации об изменении</p></div></div></div></div></section>
-<section id="_on2_байдизайн_и_как_с_этим_жить"><h2>O(n<sup>2</sup>) байдизайн и как с этим жить</h2><div class="slide-content"><div class="ulist"><ul><li><p>В сетевой игре участвует N игроков</p></li><li><p>У каждого из них есть персонаж в игровом мире</p></li><li><p>Каждый игрок видит всех персонажей<sup>1</sup></p></li><li><p>N * N = N<sup>2</sup></p></li></ul></div></div></section>
-<section id="_on2_как_уменьшить_сложность"><h2>O(n<sup>2</sup>): как уменьшить сложность?</h2><div class="slide-content"><div class="paragraph"><p>Читайте в книге Спиридонова</p></div>
-<div class="imageblock"><img src="images/nikak.png" alt="nikak"></div></div></section>
-<section id="_on2_не_все_n_рождены_равными"><h2>O(n<sup>2</sup>): не все N рождены равными</h2><div class="slide-content"><div class="ulist"><ul><li><p>Персонажи изменяются часто и много</p></li><li><p>Прожектайлы (снаряды, т.п.) хорошо предсказуемы</p></li><li><p>Более близкие к игроку объекты важнее далёких</p></li></ul></div></div></section>
-<section id="_on2_distance_based_priority"><h2>O(n<sup>2</sup>): distance-based priority</h2><div class="slide-content"><div class="paragraph"><p>Берём и говорим: чем дальше от игрока сетевой актор, тем реже присылаем изменения его состояния</p></div></div></section>
-<section id="_on2_relevancy"><h2>O(n<sup>2</sup>): relevancy</h2></section>
-<section id="_relevancy"><h2>Relevancy</h2></section>
-<section id="_on2_replication_graph"><h2>O(n<sup>2</sup>): replication graph</h2><div class="slide-content"><div class="ulist"><ul><li><p>Вместо того чтобы</p></li></ul></div></div></section>
-<section id="_применение_в_ue4"><h2>Применение в UE4</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-cpp hljs" data-noescape="true" data-lang="cpp">class AReplica : public AActor {
-    AReplica() {
-        bReplicates = true;
+<div class="paragraph"><p><span class="icon"><i class="fa fa-minus"></i></span> Надо не забывать сообщать системе репликации об изменении</p></div></div></div></div></section></section>
+<section><section id="_on2_байдизайн_и_как_с_этим_жить"><h2>O(n<sup>2</sup>) байдизайн и как с этим жить</h2><div class="slide-content"><div class="ulist"><ul><li><p>В сетевой игре участвует N игроков</p></li><li><p>У каждого из них есть персонаж в игровом мире</p></li><li><p>Каждый игрок видит всех персонажей<sup class="footnote">[<span class="footnote" title="View footnote.">1</span>]</sup></p></li><li><p>N * N = N<sup>2</sup></p></li></ul></div></div><div class="footnotes"><div class="footnote">1. Не совсем и не всегда</div></div></section><section id="_on2_как_уменьшить_сложность"><h2>O(n<sup>2</sup>): как уменьшить сложность?</h2><div class="slide-content"><div class="paragraph"><p>Читайте в книге Спиридонова</p></div>
+<div class="imageblock"><img src="images/nikak.png" alt="nikak"></div></div></section><section id="_не_все_n_рождены_равными"><h2>Не все N рождены равными</h2><div class="slide-content"><div class="ulist"><ul><li><p>Персонажи изменяются часто и много</p></li><li><p>Прожектайлы (снаряды, т.п.) хорошо предсказуемы</p></li><li><p>Более близкие к игроку объекты важнее далёких</p></li></ul></div></div></section><section id="_relevancy"><h2>Relevancy</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">if (actor.IsRelevantFor(viewer)) {
+    actor.Replicate(viewer);
+} else {
+    actor.Unreplicate(viewer);
+}</code></pre></div></div></div></section><section id="_frequency"><h2>Frequency</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">FramesBetweenUpdates = Round(ServerTickRate / Actor.NetUpdateFrequency);</code></pre></div></div>
+<div class="paragraph"><p>Реже выполняются обновления Actor &#8594; Replica State, а значит реже per-connection state отличается от Replica State.</p></div></div></section><section id="_dormancy"><h2>Dormancy</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">void TickReplica() {
+    if (!actor.IsDormant()) {
+        // update Replica State
     }
+}</code></pre></div></div></div></section><section id="_distance_based_priority"><h2>Distance-based priority</h2><div class="slide-content"><div class="paragraph"><p>Чем дальше от игрока сетевой актор, тем реже выполняется Replica State &#8594; per-connection state.</p></div></div></section><section id="_replication_graph"><h2>Replication graph</h2><div class="slide-content"><div class="ulist"><ul><li><p>Акторы группируются на сервере (например, по сетке на карте)</p></li><li><p>Отсечение "неинтересных" игроку акторов делается на уровне <strong>групп</strong></p></li></ul></div></div></section></section>
+<section id="_server_server_репликация_aka_распил"><h2>Server-server репликация aka "распил"</h2><div class="slide-content"><div class="paragraph"><p>TODO</p></div></div></section>
+<section id="_end_of_theory"><h2>End of theory</h2></section>
+<section><section id="_применение_в_ue4_memory_scanning"><h2>Применение в UE4, memory scanning</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-cpp hljs" data-noescape="true" data-lang="cpp">class AReplica : public AActor {
+    AReplica() { bReplicates = true; }
+
     UPROPERTY(Replicated)
-    int Foo;
+    int32 Foo;
 
     void GetLifetimeReplicatedProps(...) const {
 	    DOREPLIFETIME(ThisClass, Foo);
     }
-}</code></pre></div></div></div></section>
-<section id="_server_server_репликация_aka_распил"><h2>Server-server репликация aka "распил"</h2></section>
+}</code></pre></div></div></div></section><section id="_применение_в_ue4_push_model"><h2>Применение в UE4, push model</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-cpp hljs" data-noescape="true" data-lang="cpp">class AReplica : public AActor {
+    AReplica() { bReplicates = true; }
+
+    UPROPERTY(Replicated)
+    int32 Foo;
+
+    void SetFoo(int32 NewVal) {
+        Foo = NewVal;
+        MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, Foo, this);
+    }
+    void GetLifetimeReplicatedProps(...) const {
+        FDoRepLifetimeParams Params; Params.bIsPushBased = true;
+        DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, Foo, Params);
+    }
+}</code></pre></div></div></div></section><section><div class="slide-content"><div class="ulist"><div class="title">Relevancy</div><ul><li><p><code>Actor::IsNetRelevantFor(viewer)</code></p></li><li><p><code>Actor::NetCullDistanceSquared</code></p></li><li><p><code>Actor::bAlwaysRelevant</code></p></li></ul></div></div></section><section><div class="slide-content"><div class="ulist"><div class="title">Frequency</div><ul><li><p><code>Actor::NetUpdatePriority</code></p></li></ul></div>
+<div class="ulist"><div class="title">Priority</div><ul><li><p><code>Actor::NetPriority</code></p></li></ul></div>
+<div class="ulist"><div class="title">Dormancy</div><ul><li><p><code>Actor::SetNetDormancy(&#8230;&#8203;)</code></p></li></ul></div></div></section><section><div class="slide-content"><div class="paragraph"><p><a href="https://www.unrealengine.com/en-US/tech-blog/replication-graph-overview-and-proper-replication-methods">Replication Graph</a></p></div>
+<div class="paragraph"><p>Since 4.20</p></div></div></section></section>
 <section id="_the_end"><h2>The End</h2></section></div></div><script src="https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/js/reveal.js"></script><script>Array.prototype.slice.call(document.querySelectorAll('.slides section')).forEach(function(slide) {
   if (slide.getAttribute('data-background-color')) return;
   // user needs to explicitly say he wants CSS color to override otherwise we might break custom css or theme (#226)
