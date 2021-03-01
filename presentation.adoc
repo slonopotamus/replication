@@ -10,4 +10,161 @@ v1.0, 2021-03-02
 
 **{revdate}**
 
+== !
+
+Репликация - сетевая синхронизация состояния primary-объекта и его копий в раздельных экземплярах приложения
+
+[plantuml]
+----
+@startuml
+package Server {
+    [Actor]
+}
+
+package Clients... {
+    [Actor']
+}
+[Actor] -> [Actor']
+@enduml
+----
+
+== TCP
+
+* Игры, где важна полная цепочка игровых событий
+* Не-риалтайм игры
+
+'''
+
+Да, я в курсе, что смешиваю stream-based и message-based
+
+== UDP
+
+* Потеряли пакет "где стоял враг секунду назад"?
+Ну и чёрт с ним, враг уже совсем в другом месте стоит
+* Нужно заново реализовывать гарантированную доставкуfootnote:[Однако это someone else's problem,{space}обычно в игровом движке уже реализовано]
+* Приложение само управляет шейпингом трафика
+
+== Гарантии консистентности
+
+Eventually-consistent система - это такая система, которая почти никогда не консистентна
+
+== Гарантии консистентности
+
+* Поле репличного объекта
+* Комбинация всех значений полей одного репличного объекта
+* Полное состояние всех репличных объектовfootnote:[На практике не встречается примерно никогда]
+
+== Shadow-copy
+
+[plantuml]
+----
+@startuml
+
+Actor --> [Gather] "Replica State (aka shadow copy)" <<ReplicaState>>
+<<ReplicaState>> --> [Full/Delta] Per-connection state
+
+@enduml
+----
+
+Shadow copy:
+
+* Компактна
+* Безопасна к использованию в отдельном потоке
+
+== Memory scanning
+
+[source,csharp]
+----
+void TickReplica() {
+    shadow = actor.Gather();
+    foreach (field in actor.replicatedFields) {
+        if (shadow[field] != prevShadow[field]) {
+            shadow[field].dirty = true;
+        }
+    }
+}
+----
+
+[.text-left]
+--
+icon:plus[] С т.з. программиста Just Works
+
+icon:minus[] Постоянно жрёт проц пропорционально количеству существующих в мире акторов
+
+--
+
+== Push-based
+
+[source,csharp]
+----
+class Actor {
+    void SetField(T newValue) {
+        T oldValue = this.val;
+
+        this.val = newValue;
+
+        if (this.val != oldValue) {
+            replica.OnPropertyChanged(this, "val", this.val);
+        }
+    }
+}
+----
+
+[.text-left]
+--
+icon:plus[] Тратится время только при изменении полей
+
+icon:minus[] Надо не забывать сообщать системе репликации об изменении
+--
+
+== O(n^2^) байдизайн и как с этим жить
+
+* В сетевой игре участвует N игроков
+* У каждого из них есть персонаж в игровом мире
+* Каждый игрок видит всех персонажей^1^
+* N * N = N^2^
+
+== O(n^2^): как уменьшить сложность?
+
+Читайте в книге Спиридонова
+
+image::nikak.png[]
+
+== O(n^2^): не все N рождены равными
+
+* Персонажи изменяются часто и много
+* Прожектайлы (снаряды, т.п.) хорошо предсказуемы
+* Более близкие к игроку объекты важнее далёких
+
+== O(n^2^): distance-based priority
+
+Берём и говорим: чем дальше от игрока сетевой актор, тем реже присылаем изменения его состояния
+
+== O(n^2^): relevancy
+
+== Relevancy
+
+== O(n^2^): replication graph
+
+* Вместо того чтобы
+
+== Применение в UE4
+
+[source,cpp]
+----
+class AReplica : public AActor {
+    AReplica() {
+        bReplicates = true;
+    }
+    UPROPERTY(Replicated)
+    int Foo;
+
+    void GetLifetimeReplicatedProps(...) const {
+	    DOREPLIFETIME(ThisClass, Foo);
+    }
+}
+----
+
+== Server-server репликация aka "распил"
+
 == The End
