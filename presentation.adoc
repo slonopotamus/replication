@@ -28,50 +28,50 @@ package Clients... {
 @enduml
 ----
 
-== TCP
+=== TCP
 
-* Игры, где важна полная цепочка игровых событий
-* Не-риалтайм игры
+* Оптимизирован под буферизацию и потоковую передачу
+* Важна полная цепочка игровых событий
+* Для не-риалтайм игр
 
-'''
-
-Да, я в курсе, что смешиваю stream-based и message-based
-
-== UDP
+=== UDP
 
 * Потеряли пакет "где стоял враг секунду назад"?
-Ну и чёрт с ним, враг уже совсем в другом месте стоит
-* Нужно заново реализовывать гарантированную доставкуfootnote:[Однако это someone else's problem,{space}обычно в игровом движке уже реализовано]
+Ну и чёрт с ним, враг уже совсем в другом месте стоит и пора уже другую информацию отправлять
+* Нужно заново реализовывать TCP-like гарантированную доставкуfootnote:[Однако это someone else's problem,{space}обычно в игровом движке уже реализовано]
 * Приложение само управляет шейпингом трафика
 
-== Гарантии консистентности
+=== Гарантии консистентности
 
 Eventually-consistent система - это такая система, которая почти никогда не консистентна
 
-== Гарантии консистентности
+=== Гарантии консистентности
 
-* Поле репличного объекта
-* Комбинация всех значений полей одного репличного объекта
+* Одно поле репличного объекта
+* Комбинация всех полей одного репличного объекта
 * Полное состояние всех репличных объектовfootnote:[На практике не встречается примерно никогда]
 
-== Shadow-copy
+=== Shadow-copy
 
 [plantuml]
 ----
 @startuml
 
-Actor --> [Gather] "Replica State (aka shadow copy)" <<ReplicaState>>
-<<ReplicaState>> --> [Full/Delta] Per-connection state
+partition Server {
+    Actor -> [Gather] "Replica state (aka shadow copy)" <<ReplicaState>>
+    <<ReplicaState>> --> [Delta-push] Per-connection replica state <<PerConnection>>
+}
+<<PerConnection>> --> [Delta-push] Client
 
 @enduml
 ----
 
 Shadow copy:
 
-* Компактна
+* Компактна в памяти
 * Безопасна к использованию в отдельном потоке
 
-== Memory scanning
+=== Memory scanning
 
 [source,csharp]
 ----
@@ -93,7 +93,7 @@ icon:minus[] Постоянно жрёт проц пропорционально
 
 --
 
-== Push-based
+=== Push-based
 
 [source,csharp]
 ----
@@ -121,43 +121,76 @@ icon:minus[] Надо не забывать сообщать системе ре
 
 * В сетевой игре участвует N игроков
 * У каждого из них есть персонаж в игровом мире
-* Каждый игрок видит всех персонажей^1^
+* Каждый игрок видит всех персонажейfootnote:[Не совсем и не всегда]
 * N * N = N^2^
 
-== O(n^2^): как уменьшить сложность?
+=== O(n^2^): как уменьшить сложность?
 
 Читайте в книге Спиридонова
 
 image::nikak.png[]
 
-== O(n^2^): не все N рождены равными
+=== Не все N рождены равными
 
 * Персонажи изменяются часто и много
 * Прожектайлы (снаряды, т.п.) хорошо предсказуемы
 * Более близкие к игроку объекты важнее далёких
 
-== O(n^2^): distance-based priority
+=== Relevancy
 
-Берём и говорим: чем дальше от игрока сетевой актор, тем реже присылаем изменения его состояния
+[source,csharp]
+----
+if (actor.IsRelevantFor(viewer)) {
+    actor.Replicate(viewer);
+} else {
+    actor.Unreplicate(viewer);
+}
+----
 
-== O(n^2^): relevancy
+=== Frequency
 
-== Relevancy
+[source,csharp]
+----
+FramesBetweenUpdates = Round(ServerTickRate / Actor.NetUpdateFrequency);
+----
 
-== O(n^2^): replication graph
+Реже выполняются обновления Actor -> Replica State, а значит реже per-connection state отличается от Replica State.
 
-* Вместо того чтобы
+=== Dormancy
 
-== Применение в UE4
+[source,csharp]
+----
+void TickReplica() {
+    if (!actor.IsDormant()) {
+        // update Replica State
+    }
+}
+----
+
+=== Distance-based priority
+
+Чем дальше от игрока сетевой актор, тем реже выполняется Replica State -> per-connection state.
+
+=== Replication graph
+
+* Акторы группируются на сервере (например, по сетке на карте)
+* Отсечение "неинтересных" игроку акторов делается на уровне *групп*
+
+== Server-server репликация aka "распил"
+
+TODO
+
+== End of theory
+
+== Применение в UE4, memory scanning
 
 [source,cpp]
 ----
 class AReplica : public AActor {
-    AReplica() {
-        bReplicates = true;
-    }
+    AReplica() { bReplicates = true; }
+
     UPROPERTY(Replicated)
-    int Foo;
+    int32 Foo;
 
     void GetLifetimeReplicatedProps(...) const {
 	    DOREPLIFETIME(ThisClass, Foo);
@@ -165,6 +198,49 @@ class AReplica : public AActor {
 }
 ----
 
-== Server-server репликация aka "распил"
+=== Применение в UE4, push model
+
+[source,cpp]
+----
+class AReplica : public AActor {
+    AReplica() { bReplicates = true; }
+
+    UPROPERTY(Replicated)
+    int32 Foo;
+
+    void SetFoo(int32 NewVal) {
+        Foo = NewVal;
+        MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, Foo, this);
+    }
+    void GetLifetimeReplicatedProps(...) const {
+        FDoRepLifetimeParams Params; Params.bIsPushBased = true;
+        DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, Foo, Params);
+    }
+}
+----
+
+=== !
+
+.Relevancy
+* `Actor::IsNetRelevantFor(viewer)`
+* `Actor::NetCullDistanceSquared`
+* `Actor::bAlwaysRelevant`
+
+=== !
+
+.Frequency
+* `Actor::NetUpdatePriority`
+
+.Priority
+* `Actor::NetPriority`
+
+.Dormancy
+* `Actor::SetNetDormancy(...)`
+
+=== !
+
+https://www.unrealengine.com/en-US/tech-blog/replication-graph-overview-and-proper-replication-methods[Replication Graph]
+
+Since 4.20
 
 == The End
