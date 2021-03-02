@@ -147,7 +147,7 @@ if (actor.IsRelevantFor(viewer)) {
 
 [source,csharp]
 ----
-FramesBetweenUpdates = Round(ServerTickRate / Actor.NetUpdateFrequency);
+FramesBetweenUpdates = ServerTickRate / Actor.NetUpdatePriority;
 ----
 
 Реже выполняются обновления Actor -> Replica State, а значит реже per-connection state отличается от Replica State.
@@ -259,6 +259,12 @@ class AReplica : public AActor {
 
 https://www.unrealengine.com/en-US/tech-blog/replication-graph-overview-and-proper-replication-methods[Replication Graph]
 
-Since 4.20
+image::ue4-replicationgraph.jpg[]
+
+[source]
+----
+[/Script/OnlineSubsystemUtils.IpNetDriver]
+ReplicationDriverClassName="/Script/ProjectName.ClassName"
+----
 
 == The End
