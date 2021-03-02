@@ -428,7 +428,7 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script></head><
         // update Replica State
     }
 }</code></pre></div></div></div></section><section id="_distance_based_priority"><h2>Distance-based priority</h2><div class="slide-content"><div class="paragraph"><p>Чем дальше от игрока сетевой актор, тем реже выполняется Replica State &#8594; per-connection state.</p></div></div></section><section id="_replication_graph"><h2>Replication graph</h2><div class="slide-content"><div class="ulist"><ul><li><p>Акторы группируются на сервере (например, по сетке на карте)</p></li><li><p>Отсечение "неинтересных" игроку акторов делается на уровне <strong>групп</strong></p></li></ul></div></div></section></section>
-<section id="_server_server_репликация_aka_распил"><h2>Server-server репликация aka "распил"</h2><div class="slide-content"><div class="imageblock"><img src="images/diag-78990a508dce98d77a7c7a846ed3aaba.png" alt="Diagram"></div></div></section>
+<section id="_сервер_сервер_репликация_aka_распил"><h2>Сервер-сервер репликация aka "распил"</h2><div class="slide-content"><div class="imageblock"><img src="images/diag-9da3aea76f55ac72043fda5aba871128.png" alt="Diagram"></div></div></section>
 <section id="_end_of_theory"><h2>End of theory</h2></section>
 <section><section id="_применение_в_ue4_memory_scanning"><h2>Применение в UE4, memory scanning</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-cpp hljs" data-noescape="true" data-lang="cpp">class AReplica : public AActor {
     AReplica() { bReplicates = true; }
