@@ -422,7 +422,7 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script></head><
     actor.Replicate(viewer);
 } else {
     actor.Unreplicate(viewer);
-}</code></pre></div></div></div></section><section id="_frequency"><h2>Frequency</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">FramesBetweenUpdates = Round(ServerTickRate / Actor.NetUpdateFrequency);</code></pre></div></div>
+}</code></pre></div></div></div></section><section id="_frequency"><h2>Frequency</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">FramesBetweenUpdates = ServerTickRate / Actor.NetUpdatePriority;</code></pre></div></div>
 <div class="paragraph"><p>Реже выполняются обновления Actor &#8594; Replica State, а значит реже per-connection state отличается от Replica State.</p></div></div></section><section id="_dormancy"><h2>Dormancy</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-csharp hljs" data-noescape="true" data-lang="csharp">void TickReplica() {
     if (!actor.IsDormant()) {
         // update Replica State
@@ -456,7 +456,9 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script></head><
 }</code></pre></div></div></div></section><section><div class="slide-content"><div class="ulist"><div class="title">Relevancy</div><ul><li><p><code>Actor::IsNetRelevantFor(viewer)</code></p></li><li><p><code>Actor::NetCullDistanceSquared</code></p></li><li><p><code>Actor::bAlwaysRelevant</code></p></li></ul></div></div></section><section><div class="slide-content"><div class="ulist"><div class="title">Frequency</div><ul><li><p><code>Actor::NetUpdatePriority</code></p></li></ul></div>
 <div class="ulist"><div class="title">Priority</div><ul><li><p><code>Actor::NetPriority</code></p></li></ul></div>
 <div class="ulist"><div class="title">Dormancy</div><ul><li><p><code>Actor::SetNetDormancy(&#8230;&#8203;)</code></p></li></ul></div></div></section><section><div class="slide-content"><div class="paragraph"><p><a href="https://www.unrealengine.com/en-US/tech-blog/replication-graph-overview-and-proper-replication-methods">Replication Graph</a></p></div>
-<div class="paragraph"><p>Since 4.20</p></div></div></section></section>
+<div class="imageblock"><img src="images/ue4-replicationgraph.jpg" alt="ue4 replicationgraph"></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-none hljs" data-noescape="true">[/Script/OnlineSubsystemUtils.IpNetDriver]
+ReplicationDriverClassName="/Script/ProjectName.ClassName"</code></pre></div></div></div></section></section>
 <section id="_the_end"><h2>The End</h2></section></div></div><script src="https://cdn.jsdelivr.net/npm/reveal.js@3.9.2/js/reveal.js"></script><script>Array.prototype.slice.call(document.querySelectorAll('.slides section')).forEach(function(slide) {
   if (slide.getAttribute('data-background-color')) return;
   // user needs to explicitly say he wants CSS color to override otherwise we might break custom css or theme (#226)
