@@ -1,4 +1,4 @@
-= Репликация - это просто (нет)
+= Репликация
 Марат Радченко <https://github.com/slonopotamus[@slonopotamus]>
 v1.0, 2021-03-02
 :source-highlighter: highlightjs
@@ -7,6 +7,10 @@ v1.0, 2021-03-02
 :revealjsdir: https://cdn.jsdelivr.net/npm/reveal.js@3.9.2
 :icons: font
 :imagesdir: images
+
+**это просто (нет)**
+
+**{revdate}**
 
 == !
 
@@ -39,7 +43,7 @@ package Clients... {
 * Нужно заново реализовывать TCP-like гарантированную доставкуfootnote:[Однако это someone else's problem,{blank}обычно в игровом движке уже реализовано]
 * Приложение само управляет шейпингом трафика
 
-=== Гарантии консистентности
+=== Консистентность
 
 * Одно поле репличного объекта
 * Комбинация всех полей одного репличного объекта
